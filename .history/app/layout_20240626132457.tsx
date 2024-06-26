@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   title: "CreditCraze",
   description: "CreditCraze is a modern banking platform for everyone.",
   icons: {
-    icon: '/icons/logo.svg'
+    icons: '/icon'
   }
 };
 
@@ -24,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${ibmPlexSerif.variable}`}>{children}</body>
+      <body className={inter.className}>{children}</body>
     </html>
   );
 }
