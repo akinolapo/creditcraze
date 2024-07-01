@@ -5,10 +5,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const loggedIn =  { firstName: 'Doe', lastName: 'John'}
+  const loggedIn =  
   return (
     <main className="flex h-screen w-full font-inter">
-        <Sidebar user={loggedIn} />
+        <Sidebar/>
         {children}
     </main>
   );
