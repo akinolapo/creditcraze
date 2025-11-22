@@ -69,14 +69,22 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
 
     if(!newUserAccount) throw new Error('Error creating user')
 
-    const dwollaCustomerUrl = await createDwollaCustomer({
-      ...userData,
-      type: 'personal'
-    })
+    // Temporarily skip Dwolla for testing
+    let dwollaCustomerUrl = '';
+    let dwollaCustomerId = '';
 
-    if(!dwollaCustomerUrl) throw new Error('Error creating Dwolla customer')
+    try {
+      dwollaCustomerUrl = await createDwollaCustomer({
+        ...userData,
+        type: 'personal'
+      }) || '';
 
-    const dwollaCustomerId = extractCustomerIdFromUrl(dwollaCustomerUrl);
+      if(dwollaCustomerUrl) {
+        dwollaCustomerId = extractCustomerIdFromUrl(dwollaCustomerUrl);
+      }
+    } catch (dwollaError) {
+      console.error('Dwolla customer creation failed, continuing without it:', dwollaError);
+    }
 
     const newUser = await database.createDocument(
       DATABASE_ID!,
@@ -84,6 +92,7 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
       ID.unique(),
       {
         ...userData,
+        name: `${firstName} ${lastName}`,
         userId: newUserAccount.$id,
         dwollaCustomerId,
         dwollaCustomerUrl
@@ -101,7 +110,8 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
 
     return parseStringify(newUser);
   } catch (error) {
-    console.error('Error', error);
+    console.error('Error during sign up:', error);
+    throw error;
   }
 }
 

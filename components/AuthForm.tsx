@@ -29,6 +29,7 @@ const AuthForm = ({ type }: { type: string }) => {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const formSchema = authFormSchema(type);
 
@@ -44,10 +45,11 @@ const AuthForm = ({ type }: { type: string }) => {
     // 2. Define a submit handler.
     const onSubmit = async (data: z.infer<typeof formSchema>) => {
       setIsLoading(true);
+      setError('');
 
       try {
         // Sign up with Appwrite & create plaid token
-        
+
         if(type === 'sign-up') {
           const userData = {
             firstName: data.firstName!,
@@ -64,6 +66,10 @@ const AuthForm = ({ type }: { type: string }) => {
 
           const newUser = await signUp(userData);
 
+          if(!newUser) {
+            throw new Error('Failed to create account. Please try again.');
+          }
+
           setUser(newUser);
         }
 
@@ -76,7 +82,8 @@ const AuthForm = ({ type }: { type: string }) => {
           if(response) router.push('/')
         }
       } catch (error) {
-        console.log(error);
+        console.error('Authentication error:', error);
+        setError(error instanceof Error ? error.message : 'An error occurred. Please try again.');
       } finally {
         setIsLoading(false);
       }
@@ -92,7 +99,7 @@ const AuthForm = ({ type }: { type: string }) => {
               height={34}
               alt="Horizon logo"
             />
-            <h1 className="text-26 font-ibm-plex-serif font-bold text-black-1">Horizon</h1>
+            <h1 className="text-26 font-ibm-plex-serif font-bold text-black-1">CreditCrazy</h1>
           </Link>
 
           <div className="flex flex-col gap-1 md:gap-3">
@@ -144,6 +151,11 @@ const AuthForm = ({ type }: { type: string }) => {
               <CustomInput control={form.control} name='password' label="Password" placeholder='Enter your password' />
 
               <div className="flex flex-col gap-4">
+                {error && (
+                  <div className="text-red-500 text-sm p-3 rounded bg-red-50 border border-red-200">
+                    {error}
+                  </div>
+                )}
                 <Button type="submit" disabled={isLoading} className="form-btn">
                   {isLoading ? (
                     <>
